@@ -32,21 +32,30 @@ def extract_prices(product_tag):
     
     prices_div = product_tag.find('div', {'class': 'css-zzliqo'})
     
-    if not prices_div:
+    if prices_div is None:
         print('Could not find prices div')
         return None, None
     
-        
-    retail = (prices_div
-              .find('h2', {'color': 'darkGrey', 'class': re.compile('css-.*-GalleryProduct')})
-              .get_text())
     
-    selling = (prices_div
-              .find('h2', {'color': 'black', 'class': re.compile('css-.*-GalleryProduct')})
-              .get_text())
+    try:
+        retail = (prices_div
+                  .find('h2', {'color': 'darkGrey', 'class': re.compile('css-.*-GalleryProduct')})
+                  .get_text())
+        retail = str_to_float(retail)
+    except AttributeError:
+        print('Warning: Could not find retail price.')
+        retail = None
     
-    retail = str_to_float(retail)
-    selling = str_to_float(selling)
+    
+    try:
+        selling = (prices_div
+                  .find('h2', {'color': 'black', 'class': re.compile('css-.*-GalleryProduct')})
+                  .get_text())
+        selling = str_to_float(selling)
+    except AttributeError:
+        print('Warning: Could not find selling price.')
+        selling = None
+    
     
     return retail, selling
 
@@ -65,6 +74,9 @@ def extract_product_info(product):
     
     product_obj['price_retail'] = retail
     product_obj['price_selling'] = selling
+
+    product_obj['url'] = 'www.onedayonly.co.za' + product.get('href')
+
     
     return product_obj
 
